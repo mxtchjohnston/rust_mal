@@ -1,5 +1,5 @@
 use crate::types::MalVal;
-use crate::types::MalVal::{Atom, Bool, Func, Hash, Int, List, MalFunc, Nil, Str, Sym, Vector};
+use crate::types::MalVal::{Atom, Bool, Func, Hash, Int, Float, List, MalFunc, Nil, Str, Sym, Vector};
 
 fn escape_str(s: &str) -> String {
     s.chars()
@@ -20,7 +20,7 @@ impl MalVal {
             Bool(true) => String::from("true"),
             Bool(false) => String::from("false"),
             Int(i) => format!("{}", i),
-            //Float(f)    => format!("{}", f),
+            Float(f)    => format!("{}", f),
             Str(s) => {
                 if let Some(keyword) = s.strip_prefix('\u{29e}') {
                     format!(":{}", keyword)

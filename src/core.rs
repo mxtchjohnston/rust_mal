@@ -18,7 +18,7 @@ macro_rules! fn_t_int_int {
     ($ret:ident, $fn:expr) => {{
         |a: MalArgs| match (&a[0], &a[1]) {
             (Int(a0), Int(a1)) => Ok($ret($fn(a0, a1))),
-            _ => error("expecting (int, int) args"),
+            _ => error("expecting (int,int) args"),
         }
     }};
 }
@@ -53,24 +53,29 @@ fn symbol(a: MalArgs) -> MalRet {
 
 fn readline(a: MalArgs) -> MalRet {
     lazy_static! {
-        static ref RL: Mutex<Editor<(), rustyline::history::DefaultHistory>> =
-            Mutex::new(Editor::<(), rustyline::history::DefaultHistory>::new().unwrap());
+        static ref RL: Mutex<Editor<(), rustyline::history::DefaultHistory>>
+          = Mutex::new(Editor::<(), rustyline::history::DefaultHistory>::new().unwrap());
     }
+    //let mut rl = Editor::<()>::new();
 
     match a[0] {
-        Str(ref p) => match RL.lock().unwrap().readline(p) {
-            Ok(mut line) => {
-                if line.ends_with('\n') {
-                    line.pop();
-                    if line.ends_with('\r') {
+        Str(ref p) => {
+            //match rl.readline(p) {
+            match RL.lock().unwrap().readline(p) {
+                Ok(mut line) => {
+                    // Remove any trailing \n or \r\n
+                    if line.ends_with('\n') {
                         line.pop();
+                        if line.ends_with('\r') {
+                            line.pop();
+                        }
                     }
+                    Ok(Str(line))
                 }
-                Ok(Str(line))
+                Err(ReadlineError::Eof) => Ok(Nil),
+                Err(e) => error(&format!("{:?}", e)),
             }
-            Err(ReadlineError::Eof) => Ok(Nil),
-            Err(e) => error(&format!("{:?}", e)),
-        },
+        }
         _ => error("readline: prompt is not Str"),
     }
 }
@@ -84,7 +89,7 @@ fn slurp(f: &str) -> MalRet {
 }
 
 fn time_ms(_a: MalArgs) -> MalRet {
-    let ms_e = match SystemTime::new().duration_since(UNIX_EPOCH) {
+    let ms_e = match SystemTime::now().duration_since(UNIX_EPOCH) {
         Ok(d) => d,
         Err(e) => return error(&format!("{:?}", e)),
     };
@@ -94,7 +99,7 @@ fn time_ms(_a: MalArgs) -> MalRet {
 }
 
 fn get(a: MalArgs) -> MalRet {
-    match (a[0].clone, a[1].clone()) {
+    match (a[0].clone(), a[1].clone()) {
         (Nil, _) => Ok(Nil),
         (Hash(ref hm, _), Str(ref s)) => match hm.get(s) {
             Some(mv) => Ok(mv.clone()),
@@ -119,9 +124,16 @@ fn dissoc(a: MalArgs) -> MalRet {
 }
 
 fn contains_q(a: MalArgs) -> MalRet {
+    match (a[0].clone(), a[1].clone()) {
+        (Hash(ref hm, _), Str(ref s)) => Ok(Bool(hm.contains_key(s))),
+        _ => error("illegal get args"),
+    }
+}
+
+fn keys(a: MalArgs) -> MalRet {
     match a[0] {
         Hash(ref hm, _) => Ok(list!(hm.keys().map(|k| { Str(k.to_string()) }).collect())),
-        _ => error("keys require hash map"),
+        _ => error("keys requires Hash Map"),
     }
 }
 
@@ -224,7 +236,11 @@ fn map(a: MalArgs) -> MalRet {
 fn conj(a: MalArgs) -> MalRet {
     match a[0] {
         List(ref v, _) => {
-            let sl = a[1..].iter().rev().cloned().collect::<Vec<MalVal>>();
+            let sl = a[1..]
+                .iter()
+                .rev()
+                .cloned()
+                .collect::<Vec<MalVal>>();
             Ok(list!([&sl[..], v].concat()))
         }
         Vector(ref v, _) => Ok(vector!([v, &a[1..]].concat())),
@@ -251,7 +267,7 @@ pub fn ns() -> Vec<(&'static str, MalVal)> {
         ("throw", func(|a| Err(ErrMalVal(a[0].clone())))),
         ("nil?", func(fn_is_type!(Nil))),
         ("true?", func(fn_is_type!(Bool(true)))),
-        ("false?", func(fn_is_type(Bool(false)))),
+        ("false?", func(fn_is_type!(Bool(false)))),
         ("symbol", func(symbol)),
         ("symbol?", func(fn_is_type!(Sym(_)))),
         (

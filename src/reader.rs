@@ -65,11 +65,11 @@ fn read_atom(rdr: &mut Reader) -> MalRet {
     static ref INT_RE: Regex = Regex::new(r"^-?[0-9]+$").unwrap();
     static ref STR_RE: Regex = Regex::new(r#""(?:\\.|[^\\"])*""#).unwrap();
   }
-  let tokens = rdr.next()?;
-  match &tokens[..] {
+  let token = rdr.next()?;
+  match &token[..] {
     "nil" => Ok(Nil),
     "false" => Ok(Bool(false)),
-    "true" => OK(Bool(true)),
+    "true" => Ok(Bool(true)),
     _ => {
       if INT_RE.is_match(&token) {
         Ok(Int(token.parse().unwrap()))
@@ -140,7 +140,7 @@ fn read_form(rdr: &mut Reader) -> MalRet {
     ")" => error("unexpected ')'"),
     "(" => read_seq(rdr, ")"),
     "]" => error("unexpected ']'"),
-    "[" => read_seq("rdr", "]"),
+    "[" => read_seq(rdr, "]"),
     "}" => error("unexpected '}'"),
     "{" => read_seq(rdr, "}"),
     _   => read_atom(rdr),
