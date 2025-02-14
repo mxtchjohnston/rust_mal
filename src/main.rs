@@ -24,6 +24,7 @@ use crate::env::{env_new, env_sets};
 #[macro_use]
 mod core;
 mod rep;
+mod number;
 use crate::rep::{rep, re};
 
 fn main() {
