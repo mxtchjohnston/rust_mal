@@ -6,7 +6,8 @@ use itertools::Itertools;
 
 use crate::env::{env_bind, Env};
 use crate::types::MalErr::{ErrMalVal, ErrString};
-use crate::types::MalVal::{Atom, Bool, Func, Hash, Int, Float, List, MalFunc, Nil, Str, Sym, Vector};
+use crate::types::MalVal::{Atom, Bool, Int, Float, Func, Hash, List, MalFunc, Nil, Str, Sym, Vector};
+
 
 #[derive(Clone)]
 pub enum MalVal {
@@ -50,6 +51,8 @@ macro_rules! list {
     List(Rc::new(v),Rc::new(Nil))
   }}
 }
+
+
 
 macro_rules! vector {
   ($seq:expr) => {{

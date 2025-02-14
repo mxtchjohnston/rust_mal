@@ -14,7 +14,8 @@ use crate::types::MalErr::ErrMalVal;
 use crate::types::MalVal::{Atom, Bool, Func, Hash, Int, Float, List, MalFunc, Nil, Str, Sym, Vector};
 use crate::types::{MalArgs, MalRet, MalVal, _assoc, _dissoc, atom, error, func, hash_map};
 
-macro_rules! fn_t_int_int {
+
+macro_rules! fn_t_num_num {
     ($ret:ident, $fn:expr) => {{
         |a: MalArgs| match (&a[0], &a[1]) {
             (Int(a0), Int(a1)) => Ok($ret($fn(a0, a1))),
@@ -307,14 +308,14 @@ pub fn ns() -> Vec<(&'static str, MalVal)> {
         ("read-string", func(fn_str!(read_str))),
         ("readline", func(readline)),
         ("slurp", func(fn_str!(slurp))),
-        ("<", func(fn_t_int_int!(Bool, |i, j| { i < j }))),
-        ("<=", func(fn_t_int_int!(Bool, |i, j| { i <= j }))),
-        (">", func(fn_t_int_int!(Bool, |i, j| { i > j }))),
-        (">=", func(fn_t_int_int!(Bool, |i, j| { i >= j }))),
-        ("+", func(fn_t_int_int!(Int, |i, j| { i + j }))),
-        ("-", func(fn_t_int_int!(Int, |i, j| { i - j }))),
-        ("*", func(fn_t_int_int!(Int, |i, j| { i * j }))),
-        ("/", func(fn_t_int_int!(Int, |i, j| { i / j }))),
+        ("<", func(fn_t_num_num!(Bool, |i, j| { i < j }))),
+        ("<=", func(fn_t_num_num!(Bool, |i, j| { i <= j }))),
+        (">", func(fn_t_num_num!(Bool, |i, j| { i > j }))),
+        (">=", func(fn_t_num_num!(Bool, |i, j| { i >= j }))),
+        ("+", func(fn_t_num_num!(Int, |i, j| { i + j }))),
+        ("-", func(fn_t_num_num!(Int, |i, j| { i - j }))),
+        ("*", func(fn_t_num_num!(Int, |i, j| { i * j }))),
+        ("/", func(fn_t_num_num!(Int, |i, j| { i / j }))),
         ("time-ms", func(time_ms)),
         ("sequential?", func(fn_is_type!(List(_, _), Vector(_, _)))),
         ("list", func(|a| Ok(list!(a.to_vec())))),
