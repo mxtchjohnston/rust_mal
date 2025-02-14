@@ -6,7 +6,7 @@ use itertools::Itertools;
 
 use crate::env::{env_bind, Env};
 use crate::types::MalErr::{ErrMalVal, ErrString};
-use crate::types::MalVal::{Atom, Bool, Func, Hash, Int, List, MalFunc, Nil, Str, Sym, Vector};
+use crate::types::MalVal::{Atom, Bool, Func, Hash, Int, Float, List, MalFunc, Nil, Str, Sym, Vector};
 
 #[derive(Clone)]
 pub enum MalVal {
@@ -184,6 +184,7 @@ impl PartialEq for MalVal {
             (Nil, Nil) => true,
             (Bool(ref a), Bool(ref b)) => a == b,
             (Int(ref a), Int(ref b)) => a == b,
+            (Float(ref a), Float(ref b)) => a == b,
             (Str(ref a), Str(ref b)) => a == b,
             (Sym(ref a), Sym(ref b)) => a == b,
             (List(ref a, _), List(ref b, _))

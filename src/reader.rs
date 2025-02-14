@@ -2,7 +2,7 @@ use regex::{Captures, Regex};
 use std::rc::Rc;
 
 use crate::types::MalErr::ErrString;
-use crate::types::MalVal::{Bool, Int, List, Nil, Str, Sym, Vector};
+use crate::types::MalVal::{Bool, Int, Float, List, Nil, Str, Sym, Vector};
 use crate::types::{error, hash_map, MalErr, MalRet, MalVal};
 
 #[derive(Debug, Clone)]
@@ -63,6 +63,7 @@ fn unescape_str(s: &str) -> String {
 fn read_atom(rdr: &mut Reader) -> MalRet {
   lazy_static! {
     static ref INT_RE: Regex = Regex::new(r"^-?[0-9]+$").unwrap();
+    static ref FLT_RE: Regex = Regex::new(r"^[+-]?(?:(?:\d+\.\d*|\.\d+)(?:[eE][+-]?\d+)?|\d+[eE][+-]?\d+)$").unwrap();
     static ref STR_RE: Regex = Regex::new(r#""(?:\\.|[^\\"])*""#).unwrap();
   }
   let token = rdr.next()?;
@@ -73,6 +74,8 @@ fn read_atom(rdr: &mut Reader) -> MalRet {
     _ => {
       if INT_RE.is_match(&token) {
         Ok(Int(token.parse().unwrap()))
+      } else if FLT_RE.is_match(&token){
+        Ok(Float(token.parse().unwrap()))
       } else if STR_RE.is_match(&token) {
         Ok(Str(unescape_str(&token[1..token.len() - 1])))
       } else if token.starts_with('\"') {
