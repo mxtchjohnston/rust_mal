@@ -271,10 +271,12 @@ pub fn print(ast: &MalVal) -> String {
     ast.pr_str(true)
 }
 
-pub fn rep(str: &str, env: &Env) -> Result<String, MalErr> {
+pub fn rep(str: &str, env: &Env, num: &i32) -> Result<String, MalErr> {
     let ast = read(str)?;
     let exp = eval(&ast, env)?;
-    Ok(print(&exp))
+    let key = MalVal::Sym(format!("${}", num));
+    let val= env_set(env, &key, exp)?;
+    Ok(print(&val))
 }
 
 pub fn re(str: &str, env: &Env) {

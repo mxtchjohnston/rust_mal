@@ -10,6 +10,7 @@ extern crate itertools;
 extern crate regex;
 
 extern crate rustyline;
+use rustyline::config::Configurer;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
@@ -36,6 +37,8 @@ fn main() {
         eprintln!("No previous history");
     }
 
+    rl.set_color_mode(rustyline::ColorMode::Enabled);
+
     let repl_env = env_new(None);
     for (k, v) in core::ns() {
         env_sets(&repl_env, k, v);
@@ -57,7 +60,7 @@ fn main() {
     }
 
     re("(println (str \"Mal [\" *host-language* \"]\"))", &repl_env);
-
+    let mut num = 0;
     loop {
         let readline = rl.readline("user> ");
         match readline {
@@ -65,11 +68,12 @@ fn main() {
                 let _ = rl.add_history_entry(&line);
                 rl.save_history(".mal-history").unwrap();
                 if !line.is_empty() {
-                    match rep(&line, &repl_env) {
+                    match rep(&line, &repl_env, &num) {
                         Ok(out) => println!("{}", out),
                         Err(e) => println!("Error: {}", format_error(e)),
                     }
                 }
+                num += 1;
             }
             Err(ReadlineError::Interrupted) => continue,
             Err(ReadlineError::Eof) => break,
